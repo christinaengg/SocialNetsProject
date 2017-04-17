@@ -71,8 +71,6 @@ graphAtt <- sapply(list.graph.attributes(g), function(attr) sub("&", "&#038;",ge
 # generate the gexf object
 write.gexf(nodes, edges, edgesWeight=E(g)$weight, edgesAtt = edgesAtt, nodesAtt = nodesAtt, output = "g.gexf")
 
-# write.gexf(nodes, edges, edgesWeight=E(g)$weight, edgesAtt = edgesAtt, nodesAtt = nodesAtt, meta=c(list(creator="Simeon Thomas", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt), output = "g.gexf")
-
 # exploring alternatives
 # to be done after gexf object is perfect
 # library(network)
