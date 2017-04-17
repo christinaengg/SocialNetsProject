@@ -1,7 +1,7 @@
 library(dplyr)
 #Bakeries in PA-review and business data
-pa_reviews = read.csv('C:/R/Yelp/bakeries_pa_reviews.csv')
-pa_bakeries = read.csv('C:/R/Yelp/yelp_bakeries_pa.csv')
+pa_reviews = read.csv('bakeries_pa_reviews.csv')
+pa_bakeries = read.csv('yelp_bakeries_pa.csv')
 
 #Merge dataframes based on review data set and make subset with only relevant data
 df_pa = merge(x=pa_reviews, y=pa_bakeries, by = "business_id", all.x = TRUE)
@@ -44,5 +44,41 @@ m = as.matrix(df_pa3)
 g = graph.edgelist(m[, 3:4], directed = FALSE)
 E(g)$weight=as.numeric(m[, 5])
 adj = get.adjacency(g, attr='weight')
+adj
+plot(g)
 
+# installing and loading rgexf package to create the gephi object
+# install.packages('rgexf')
+library(rgexf)
+# saveAsGEXF(g, filepath = "g.gexf") not working
 
+# manually creating the rgexf object from igraph nodes and edges
+# http://gopalakrishna.palem.in/iGraphExport.html#GexfExport
+nodes <- data.frame(cbind(V(g), as.character(V(g))))
+edges <- t(Vectorize(get.edge, vectorize.args='id')(g, 1:ecount(g)))
+
+# combine all node attributes into a matrix (and take care of & for xml)
+vAttrNames <- setdiff(list.vertex.attributes(g), "label")
+nodesAtt <- data.frame(sapply(vAttrNames, function(attr) sub("&", "&#038;",get.vertex.attribute(g, attr))))
+
+# combine all edge attributes into a matrix (and take care of & for xml)
+eAttrNames <- setdiff(list.edge.attributes(g), "weight") 
+edgesAtt <- data.frame(sapply(eAttrNames, function(attr) sub("&", "&#038;",get.edge.attribute(g, attr))))
+
+# combine all graph attributes into a meta-data
+graphAtt <- sapply(list.graph.attributes(g), function(attr) sub("&", "&#038;",get.graph.attribute(g, attr)))
+
+# generate the gexf object
+write.gexf(nodes, edges, edgesWeight=E(g)$weight, edgesAtt = edgesAtt, nodesAtt = nodesAtt, output = "g.gexf")
+
+# write.gexf(nodes, edges, edgesWeight=E(g)$weight, edgesAtt = edgesAtt, nodesAtt = nodesAtt, meta=c(list(creator="Simeon Thomas", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt), output = "g.gexf")
+
+# exploring alternatives
+# to be done after gexf object is perfect
+# library(network)
+# install.packages("sna")
+# library(sna)
+# library(ggplot2)
+# install.packages("GGally")
+# library(GGally)
+# ggnet2(g)
